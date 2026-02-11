@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hello World</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Arial', sans-serif;
+            overflow: hidden;
+            cursor: crosshair;
+            transition: background 0.5s ease;
+        }
+
+        #canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        .container {
+            text-align: center;
+            animation: fadeInUp 1s ease-out;
+            z-index: 10;
+            position: relative;
+            user-select: none;
+        }
+
+        h1 {
+            font-size: 5rem;
+            color: white;
+            text-shadow: 0 5px 15px rgba(0, 0, 0, 0.3),
+                         0 0 30px rgba(255, 255, 255, 0.5);
+            margin-bottom: 20px;
+            animation: bounce 2s infinite, colorShift 5s infinite;
+            transition: transform 0.1s ease;
+        }
+
+        h1:hover {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        .wave {
+            display: inline-block;
+            font-size: 4rem;
+            animation: wave 1.5s ease-in-out infinite;
+        }
+
+        .subtitle {
+            font-size: 1.5rem;
+            color: rgba(255, 255, 255, 0.9);
+            margin-top: 20px;
+            animation: pulse 2s infinite;
+        }
+
+        .controls {
+            margin-top: 40px;
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 15px 30px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 50px;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .particle {
+            position: fixed;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .info {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+            z-index: 10;
+        }
+
+        .dog-image {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 5px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3),
+                        0 0 50px rgba(255, 255, 255, 0.2);
+            margin: 30px auto;
+            animation: float 3s ease-in-out infinite, glow 2s ease-in-out infinite;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .dog-image:hover {
+            transform: scale(1.15) rotate(5deg);
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+
+        @keyframes glow {
+            0%, 100% {
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3),
+                            0 0 50px rgba(255, 255, 255, 0.2);
+            }
+            50% {
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3),
+                            0 0 80px rgba(255, 255, 255, 0.5);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+
+        @keyframes wave {
+            0%, 100% {
+                transform: rotate(0deg);
+            }
+            25% {
+                transform: rotate(20deg);
+            }
+            75% {
+                transform: rotate(-20deg);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 0.9;
+            }
+            50% {
+                opacity: 1;
+            }
+        }
+
+        @keyframes colorShift {
+            0%, 100% {
+                filter: hue-rotate(0deg);
+            }
+            50% {
+                filter: hue-rotate(20deg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+
+    <div class="container">
+        <h1 id="title">hello world <span class="wave">👋</span></h1>
+        <img src="https://placedog.net/400/400?random" alt="Random Dog" class="dog-image" id="dogImage">
+        <p class="subtitle">Click anywhere to create magic ✨</p>
+
+        <div class="controls">
+            <button onclick="changeBackground()">Change Colors</button>
+            <button onclick="explosionMode()">Explosion!</button>
+            <button onclick="toggleParticles()">Toggle Particles</button>
+            <button onclick="resetEverything()">Reset</button>
+        </div>
+    </div>
+
+    <div class="info">Move your mouse around • Click to create particles • Have fun!</div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        let particles = [];
+        let mouseTrail = [];
+        let hue = 0;
+        let particlesEnabled = true;
+        let backgroundColors = [
+            ['#667eea', '#764ba2'],
+            ['#f093fb', '#f5576c'],
+            ['#4facfe', '#00f2fe'],
+            ['#43e97b', '#38f9d7'],
+            ['#fa709a', '#fee140'],
+            ['#30cfd0', '#330867']
+        ];
+        let currentBg = 0;
+
+        class Particle {
+            constructor(x, y, speedX, speedY, size, color) {
+                this.x = x;
+                this.y = y;
+                this.speedX = speedX;
+                this.speedY = speedY;
+                this.size = size;
+                this.color = color;
+                this.alpha = 1;
+                this.gravity = 0.1;
+            }
+
+            update() {
+                this.speedY += this.gravity;
+                this.x += this.speedX;
+                this.y += this.speedY;
+                this.alpha -= 0.01;
+                this.size = Math.max(0, this.size - 0.1);
+            }
+
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = this.alpha;
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        function createParticles(x, y, count = 15) {
+            for (let i = 0; i < count; i++) {
+                const angle = (Math.PI * 2 * i) / count;
+                const speed = Math.random() * 5 + 2;
+                const speedX = Math.cos(angle) * speed;
+                const speedY = Math.sin(angle) * speed;
+                const size = Math.random() * 10 + 5;
+                const color = `hsl(${hue}, 100%, 60%)`;
+                particles.push(new Particle(x, y, speedX, speedY, size, color));
+            }
+        }
+
+        function animate() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw mouse trail
+            if (mouseTrail.length > 0) {
+                ctx.beginPath();
+                ctx.strokeStyle = `hsl(${hue}, 100%, 60%)`;
+                ctx.lineWidth = 3;
+                ctx.moveTo(mouseTrail[0].x, mouseTrail[0].y);
+                for (let i = 1; i < mouseTrail.length; i++) {
+                    ctx.lineTo(mouseTrail[i].x, mouseTrail[i].y);
+                }
+                ctx.stroke();
+            }
+
+            // Update and draw particles
+            particles = particles.filter(particle => {
+                particle.update();
+                particle.draw();
+                return particle.alpha > 0 && particle.size > 0;
+            });
+
+            hue += 0.5;
+            if (hue > 360) hue = 0;
+
+            requestAnimationFrame(animate);
+        }
+
+        document.addEventListener('mousemove', (e) => {
+            mouseTrail.push({ x: e.clientX, y: e.clientY });
+            if (mouseTrail.length > 20) {
+                mouseTrail.shift();
+            }
+
+            if (particlesEnabled && Math.random() > 0.9) {
+                createParticles(e.clientX, e.clientY, 3);
+            }
+        });
+
+        document.addEventListener('click', (e) => {
+            if (e.target.tagName !== 'BUTTON') {
+                createParticles(e.clientX, e.clientY, 30);
+
+                // Screen shake
+                document.querySelector('h1').style.animation = 'none';
+                setTimeout(() => {
+                    document.querySelector('h1').style.animation = 'bounce 2s infinite, colorShift 5s infinite';
+                }, 10);
+            }
+        });
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+        function changeBackground() {
+            currentBg = (currentBg + 1) % backgroundColors.length;
+            const [color1, color2] = backgroundColors[currentBg];
+            document.body.style.background = `linear-gradient(135deg, ${color1} 0%, ${color2} 100%)`;
+        }
+
+        function explosionMode() {
+            for (let i = 0; i < 5; i++) {
+                setTimeout(() => {
+                    const x = Math.random() * canvas.width;
+                    const y = Math.random() * canvas.height;
+                    createParticles(x, y, 50);
+                }, i * 200);
+            }
+        }
+
+        function toggleParticles() {
+            particlesEnabled = !particlesEnabled;
+        }
+
+        function resetEverything() {
+            particles = [];
+            mouseTrail = [];
+            currentBg = 0;
+            document.body.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+
+        // Initialize
+        document.body.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+        animate();
+
+        // Dog image interaction
+        const dogImage = document.getElementById('dogImage');
+        dogImage.addEventListener('click', (e) => {
+            e.stopPropagation();
+            // Create explosion at dog image center
+            const rect = dogImage.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            createParticles(centerX, centerY, 50);
+
+            // Load new random dog
+            dogImage.style.transform = 'scale(0.8) rotate(360deg)';
+            setTimeout(() => {
+                dogImage.src = `https://placedog.net/400/400?random=${Date.now()}`;
+                dogImage.style.transform = '';
+            }, 300);
+        });
+
+        // Add floating emojis
+        const emojis = ['✨', '🌟', '💫', '⭐', '🎨', '🎭', '🎪', '🎨'];
+        setInterval(() => {
+            const emoji = document.createElement('div');
+            emoji.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+            emoji.style.position = 'fixed';
+            emoji.style.left = Math.random() * 100 + '%';
+            emoji.style.top = '100%';
+            emoji.style.fontSize = Math.random() * 30 + 20 + 'px';
+            emoji.style.opacity = '0.6';
+            emoji.style.zIndex = '1';
+            emoji.style.pointerEvents = 'none';
+            emoji.style.transition = 'all 5s linear';
+            document.body.appendChild(emoji);
+
+            setTimeout(() => {
+                emoji.style.top = '-100px';
+                emoji.style.transform = `rotate(${Math.random() * 360}deg)`;
+            }, 10);
+
+            setTimeout(() => emoji.remove(), 5000);
+        }, 1000);
+    </script>
+</body>
+</html>
